@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/IMG/8908646.png">
+    <title>Weather App</title>
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #6fb1fc, #4364f7);
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .weather-icon {
+            width: 100px;
+            margin: 20px auto;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .forecast {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .forecast-day {
+            text-align: center;
+        }
+
+        .forecast-day img {
+            width: 50px;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" id="city" placeholder="Enter city">
+            <button onclick="getWeather()">Search</button>
+        </div>
+        <div id="current-weather">
+            <h2 id="city-name"></h2>
+            <img id="weather-icon" class="weather-icon" alt="Weather Icon">
+            <p id="temperature"></p>
+            <p id="description"></p>
+        </div>
+        <div id="forecast" class="forecast"></div>
+    </div>
+    <footer>
+        &copy; 2024 Weather App. All Shivane Jivaji rights reserved.
+    </footer>
+
+    <script>
+        const apiKey = '7442d48435a494fc82e4ba2cb578456b'; 
+
+        function getWeather() {
+            const city = document.getElementById('city').value;
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => displayCurrentWeather(data))
+                .catch(error => console.error('Error fetching current weather:', error));
+
+            fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => displayForecast(data))
+                .catch(error => console.error('Error fetching forecast:', error));
+        }
+
+        function displayCurrentWeather(data) {
+            document.getElementById('city-name').textContent = data.name;
+            document.getElementById('temperature').textContent = `Temperature: ${data.main.temp}°C`;
+            document.getElementById('description').textContent = data.weather[0].description;
+            document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        }
+
+        function displayForecast(data) {
+            const forecastContainer = document.getElementById('forecast');
+            forecastContainer.innerHTML = '';
+            for (let i = 0; i < data.list.length; i += 8) {
+                const day = data.list[i];
+                const forecastDay = document.createElement('div');
+                forecastDay.classList.add('forecast-day');
+
+                const date = new Date(day.dt_txt).toLocaleDateString('en-US', {
+                    weekday: 'long'
+                });
+
+                forecastDay.innerHTML = `
+                    <p>${date}</p>
+                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
+                    <p>${day.main.temp}°C</p>
+                `;
+                forecastContainer.appendChild(forecastDay);
+            }
+        }
+    </script>
+</body>
+
+</html>
